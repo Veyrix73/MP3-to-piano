@@ -290,10 +290,12 @@ function pitchXml(midiPitch) {
   ];
   const [step, alter, accidental] = pitchClasses[midiPitch % 12];
   const octave = Math.floor(midiPitch / 12) - 1;
-  return "<pitch><step>" + step + "</step>" +
-    (alter ? "<alter>" + alter + "</alter>" : "") +
-    "<octave>" + octave + "</octave></pitch>" +
-    (accidental ? "<accidental>" + accidental + "</accidental>" : "");
+  return {
+    pitch: "<pitch><step>" + step + "</step>" +
+      (alter ? "<alter>" + alter + "</alter>" : "") +
+      "<octave>" + octave + "</octave></pitch>",
+    accidental: accidental ? "<accidental>" + accidental + "</accidental>" : ""
+  };
 }
 
 const DURATIONS = [
@@ -323,12 +325,14 @@ function noteElement(fragment, duration, voice, staff, chordTone, tieStart, tieS
   const ticks = Math.max(1, Math.round(duration.beats * DIVISIONS));
   let xml = "<note>";
   if (chordTone) xml += "<chord/>";
-  xml += pitchXml(fragment.pitch);
+  const pitch = pitchXml(fragment.pitch);
+  xml += pitch.pitch;
   xml += "<duration>" + ticks + "</duration>";
   if (tieStop) xml += '<tie type="stop"/>';
   if (tieStart) xml += '<tie type="start"/>';
   xml += "<voice>" + voice + "</voice><type>" + duration.type + "</type>";
   for (let i = 0; i < duration.dots; i++) xml += "<dot/>";
+  xml += pitch.accidental;
   xml += "<staff>" + staff + "</staff>";
   if (tieStart || tieStop) {
     xml += "<notations>";
